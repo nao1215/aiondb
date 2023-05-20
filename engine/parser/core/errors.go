@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-var ()
-
 // Wrap return wrapping error with message.
 // If e is nil, return new error with msg. If msg is empty string, return e.
 func Wrap(e error, message string) error {
