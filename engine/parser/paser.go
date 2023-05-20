@@ -8,7 +8,7 @@ import (
 )
 
 // SQLSyntaxMode is the SQL syntax mode.
-type SQLSyntaxMode int
+type SQLSyntaxMode uint64
 
 const (
 	// SQLSyntaxModeDefault is the default SQL syntax mode. It is the same as MySQL.
