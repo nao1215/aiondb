@@ -23,6 +23,7 @@ func NewLexer(input string) *Lexer {
 }
 
 // Lex performs lexical analysis.
+// TODO: move to core
 func (l *Lexer) Lex() ([]core.Token, error) {
 	isMatch := false
 	for l.lex.Position.Current < l.lex.Instruction.Length {
