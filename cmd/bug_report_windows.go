@@ -1,5 +1,6 @@
 //go:build windows
 
+// Package cmd is a package that contains subcommands for the aion CLI command.
 package cmd
 
 import (

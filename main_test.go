@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_main(t *testing.T) {
+func TestMain(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Execute version subcommand", func(t *testing.T) {

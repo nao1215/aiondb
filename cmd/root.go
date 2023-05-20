@@ -1,4 +1,4 @@
-// Package cmd is a package that contains subcommands for the jose CLI command.
+// Package cmd is a package that contains subcommands for the aion CLI command.
 package cmd
 
 import (
