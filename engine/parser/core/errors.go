@@ -5,6 +5,11 @@ import (
 	"fmt"
 )
 
+var (
+	// ErrLexerSyntaxErr means "syntax error in user input"
+	ErrLexerSyntaxErr = errors.New("failed to lex instruction. syntax error")
+)
+
 // Wrap return wrapping error with message.
 // If e is nil, return new error with msg. If msg is empty string, return e.
 func Wrap(e error, message string) error {
