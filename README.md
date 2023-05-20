@@ -15,3 +15,5 @@ AION is not an acronym formed by combining initials of English words. It is borr
 
 ## LICENSE
 MIT License
+
+The code of AION DB is based on [proullon/ramsql](https://github.com/proullon/ramsql), and ramsql is licensed under [the BSD 3-Clause "New" or "Revised" License](https://github.com/proullon/ramsql/blob/master/LICENSE).
