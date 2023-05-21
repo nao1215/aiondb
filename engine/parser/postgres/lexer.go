@@ -3,7 +3,6 @@ package postgres
 import (
 	"fmt"
 	"os"
-	"unicode"
 
 	"github.com/nao1215/aiondb/engine/parser/core"
 )
@@ -72,77 +71,38 @@ func newMatchers(l *Lexer) *core.Matchers {
 		l.matchDefaultToken,
 		l.matchTrueToken,
 		l.matchFalseToken,
+		l.matchAscToken,
+		l.matchDescToken,
+		l.matchAndToken,
+		l.matchOrToken,
+		l.matchInToken,
+		l.matchReturningToken,
+		l.matchTruncateToken,
+		l.matchDropToken,
+		l.matchGrantToken,
+		l.matchWithToken,
+		l.matchTimeToken,
+		l.matchZoneToken,
+		l.matchIsToken,
+		l.matchForToken,
+		l.matchLimitToken,
+		l.matchOrderToken,
+		l.matchByToken,
+		l.matchSetToken,
+		l.matchUpdateToken,
+		l.matchCreateToken,
+		l.matchSelectToken,
+		l.matchDistinctToken,
+		l.matchInsertToken,
+		l.matchWhereToken,
+		l.matchFromToken,
+		l.matchTableToken,
+		l.matchNullToken,
+		l.matchIfToken,
+		l.matchNotToken,
+		l.matchExistsToken,
+		l.matchCountToken,
+		l.matchDeleteToken,
+		l.matchAutoIncrementToken,
 	}
-}
-
-// appendToken appends a token to the lexer.
-// Now that the verification of the current position (character) is complete,
-// the next position will check.
-func (l *Lexer) appendToken(t core.Token) {
-	l.lex.Tokens = append(l.lex.Tokens, t)
-	l.lex.Position.Current++
-}
-
-// Match checks whether the argument str matches the SQL token specified in the argument.
-// The argument str can be entered in either uppercase or lowercase.
-func (l *Lexer) Match(str []byte, token core.TokenID) bool {
-	if l.Position()+uint64(len(str))-1 > l.InstructionLength() {
-		return false
-	}
-
-	for i := range str {
-		if unicode.ToLower(rune(l.lex.Instruction.Content[int(l.Position())+i])) != unicode.ToLower(rune(str[i])) {
-			return false
-		}
-	}
-
-	// if next character is still a string, it means it doesn't match
-	// ie: COUNT shoulnd match COUNTRY
-	if l.InstructionLength() > l.Position()+uint64(len(str)) {
-		if unicode.IsLetter(rune(l.lex.Instruction.Content[l.Position()+uint64(len(str))])) ||
-			l.lex.Instruction.Content[l.Position()+uint64(len(str))] == '_' {
-			return false
-		}
-	}
-	l.appendToken(core.Token{ID: token, Lexeme: core.Lexeme(str)})
-	return true
-}
-
-// matchSpaceToken checks whether it matches the space(e.g. " ") token.
-func (l *Lexer) matchSpaceToken() bool {
-	if !unicode.IsSpace(rune(l.lex.Instruction.Content[l.lex.Position.Current])) {
-		return false
-	}
-	l.appendToken(core.Token{ID: core.TokenIDSpace, Lexeme: " "})
-	return true
-}
-
-// matchNowToken checks whether it matches the now() token.
-func (l *Lexer) matchNowToken() bool {
-	return l.Match([]byte("now()"), core.TokenIDNow)
-}
-
-// matchUniqueToken checks whether it matches the unique token.
-func (l *Lexer) matchUniqueToken() bool {
-	return l.Match([]byte("unique"), core.TokenIDUnique)
-}
-
-// matchLocalTimestampToken checks whether it matches the localtimestamp token.
-func (l *Lexer) matchLocalTimestampToken() bool {
-	return l.Match([]byte("localtimestamp"), core.TokenIDLocalTimestamp)
-}
-
-// matchDefaultToken checks whether it matches the default token.
-func (l *Lexer) matchDefaultToken() bool {
-	return l.Match([]byte("default"), core.TokenIDDefault)
-}
-
-// matchTrueToken checks whether it matches the true token.
-func (l *Lexer) matchTrueToken() bool {
-	return l.Match([]byte("true"), core.TokenIDTrue)
-}
-
-// matchFlaseToken checks whether it matches the false token.
-func (l *Lexer) matchFalseToken() bool {
-	return l.Match([]byte("false"), core.TokenIDFalse)
 }
