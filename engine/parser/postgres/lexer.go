@@ -43,7 +43,7 @@ func (l *Lexer) Lex() ([]core.Token, error) {
 		if l.lex.Position.IsSyntaxErr() {
 			fmt.Fprintf(os.Stderr, "Cannot lex <%s>, stuck at pos %d -> [%c]",
 				l.lex.Instruction.Content, l.Position(), l.lex.Instruction.Content[l.Position()])
-			return nil, core.Wrap(core.ErrLexerSyntaxErr,
+			return nil, core.Wrap(core.ErrLexerSyntax,
 				fmt.Sprintf("near %s", l.lex.Instruction.Content[l.Position():]))
 		}
 		l.lex.Position.Security = l.Position()
@@ -114,5 +114,24 @@ func newMatchers(l *Lexer) *core.Matchers {
 		l.matchIndexToken,
 		l.matchCollateToken,
 		l.matchNocaseToken,
+		l.matchSingleQuoteToken,
+		l.matchDoubleQuoteToken,
+		l.matchDateToken,
+		l.matchEscapedStringToken,
+		l.matchStringToken,
+		l.matchNumberToken,
+		l.matchSemicolonToken,
+		l.matchPeriodToken,
+		l.matchBracketOpeningToken,
+		l.matchBracketClosingToken,
+		l.matchCommaToken,
+		l.matchStarToken,
+		l.matchEqualityToken,
+		l.matchDistinctnessToken,
+		l.matchLeftDipleToken,
+		l.matchRightDipleToken,
+		l.matchLessOrEqualToken,
+		l.matchGreaterOrEqualToken,
+		l.matchBacktickToken,
 	}
 }
