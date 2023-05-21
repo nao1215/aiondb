@@ -47,8 +47,8 @@ const (
 
 	// TokenIDDoubleQuote is the token ID for double quote.
 	TokenIDDoubleQuote TokenID = 100
-	// TokenIDSimpleQuote is the token ID for simple quote.
-	TokenIDSimpleQuote TokenID = 101
+	// TokenIDSingleQuote is the token ID for single quote.
+	TokenIDSingleQuote TokenID = 101
 	// TokenIDStar is the token ID for star.
 	TokenIDStar TokenID = 102
 	// TokenIDEquality is the token ID for equal.
