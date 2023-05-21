@@ -147,20 +147,22 @@ const (
 	TokenIDDefault TokenID = 328
 	// TokenIDLocalTimestamp is the token ID for local timestamp.
 	TokenIDLocalTimestamp TokenID = 329
+	// TokenIDTrue is the token ID for true.
+	TokenIDTrue TokenID = 330
 	// TokenIDFalse is the token ID for false.
-	TokenIDFalse TokenID = 330
+	TokenIDFalse TokenID = 331
 	// TokenIDUnique is the token ID for unique.
-	TokenIDUnique TokenID = 331
+	TokenIDUnique TokenID = 332
 	// TokenIDNow is the token ID for now.
-	TokenIDNow TokenID = 332
+	TokenIDNow TokenID = 333
 	// TokenIDOffset is the token ID for offset.
-	TokenIDOffset TokenID = 333
+	TokenIDOffset TokenID = 334
 	// TokenIDIndex is the token ID for index.
-	TokenIDIndex TokenID = 334
+	TokenIDIndex TokenID = 335
 	// TokenIDCollate is the token ID for collate.
-	TokenIDCollate TokenID = 335
+	TokenIDCollate TokenID = 336
 	// TokenIDNocase is the token ID for nocase.
-	TokenIDNocase TokenID = 336
+	TokenIDNocase TokenID = 337
 
 	//=======================
 	//  Type token
