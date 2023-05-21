@@ -104,5 +104,15 @@ func newMatchers(l *Lexer) *core.Matchers {
 		l.matchCountToken,
 		l.matchDeleteToken,
 		l.matchAutoIncrementToken,
+		l.matchPrimaryToken,
+		l.matchKeyToken,
+		l.matchIntoToken,
+		l.matchValuesToken,
+		l.matchJoinToken,
+		l.matchOnToken,
+		l.matchOffsetToken,
+		l.matchIndexToken,
+		l.matchCollateToken,
+		l.matchNocaseToken,
 	}
 }

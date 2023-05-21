@@ -244,3 +244,53 @@ func (l *Lexer) matchAutoIncrementToken() bool {
 	}
 	return l.Match([]byte("autoincrement"), core.TokenIDAutoincrement)
 }
+
+// matchPrimaryToken checks whether it matches the primary token.
+func (l *Lexer) matchPrimaryToken() bool {
+	return l.Match([]byte("primary"), core.TokenIDPrimary)
+}
+
+// matchKeyToken checks whether it matches the key token.
+func (l *Lexer) matchKeyToken() bool {
+	return l.Match([]byte("key"), core.TokenIDKey)
+}
+
+// matchIntoToken checks whether it matches the into token.
+func (l *Lexer) matchIntoToken() bool {
+	return l.Match([]byte("into"), core.TokenIDInto)
+}
+
+// matchValuesToken checks whether it matches the values token.
+func (l *Lexer) matchValuesToken() bool {
+	return l.Match([]byte("values"), core.TokenIDValues)
+}
+
+// matchJoinToken checks whether it matches the join token.
+func (l *Lexer) matchJoinToken() bool {
+	return l.Match([]byte("join"), core.TokenIDJoin)
+}
+
+// matchOnToken checks whether it matches the on token.
+func (l *Lexer) matchOnToken() bool {
+	return l.Match([]byte("on"), core.TokenIDOn)
+}
+
+// matchOffsetToken checks whether it matches the offset token.
+func (l *Lexer) matchOffsetToken() bool {
+	return l.Match([]byte("offset"), core.TokenIDOffset)
+}
+
+// matchIndexToken checks whether it matches the index token.
+func (l *Lexer) matchIndexToken() bool {
+	return l.Match([]byte("index"), core.TokenIDIndex)
+}
+
+// matchCollateToken checks whether it matches the collate token.
+func (l *Lexer) matchCollateToken() bool {
+	return l.Match([]byte("collate"), core.TokenIDCollate)
+}
+
+// matchNocaseToken	checks whether it matches the nocase token.
+func (l *Lexer) matchNocaseToken() bool {
+	return l.Match([]byte("nocase"), core.TokenIDNocase)
+}
