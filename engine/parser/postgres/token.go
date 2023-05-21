@@ -111,8 +111,7 @@ func (l *Lexer) matchDateToken() bool {
 	}
 
 	data := string(l.lex.Instruction.Content[l.Position():i])
-	_, err := core.ParseDate(data)
-	if err != nil {
+	if _, err := core.ParseDate(data); err != nil {
 		return false
 	}
 	l.appendToken(core.Token{ID: core.TokenIDDate, Lexeme: core.Lexeme(data)})
@@ -203,7 +202,7 @@ func (l *Lexer) matchEscapedStringToken() bool {
 	escaped := l.lex.Instruction.Content[l.Position()+2 : i-1]
 
 	for _, r := range escaped {
-		if unicode.IsDigit(rune(r)) == false {
+		if !unicode.IsDigit(rune(r)) {
 			tokenID = core.TokenIDString
 		}
 	}
