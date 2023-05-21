@@ -70,12 +70,13 @@ func newMatchers(l *Lexer) *core.Matchers {
 		l.matchUniqueToken,
 		l.matchLocalTimestampToken,
 		l.matchDefaultToken,
-		l.matchFalseToken
+		l.matchTrueToken,
+		l.matchFalseToken,
 	}
 }
 
 // appendToken appends a token to the lexer.
-// Now that the verification of the current position (charachter) is complete,
+// Now that the verification of the current position (character) is complete,
 // the next position will check.
 func (l *Lexer) appendToken(t core.Token) {
 	l.lex.Tokens = append(l.lex.Tokens, t)
@@ -134,6 +135,11 @@ func (l *Lexer) matchLocalTimestampToken() bool {
 // matchDefaultToken checks whether it matches the default token.
 func (l *Lexer) matchDefaultToken() bool {
 	return l.Match([]byte("default"), core.TokenIDDefault)
+}
+
+// matchTrueToken checks whether it matches the true token.
+func (l *Lexer) matchTrueToken() bool {
+	return l.Match([]byte("true"), core.TokenIDTrue)
 }
 
 // matchFlaseToken checks whether it matches the false token.
