@@ -94,7 +94,9 @@ func (p *Parser) parseTable(tokens []core.Token) (*core.Decl, error) {
 
 		// Closing bracket ?
 		if tokens[p.index].ID == core.TokenIDBracketClosing {
-			p.consumeToken(core.TokenIDBracketClosing)
+			if _, err := p.consumeToken(core.TokenIDBracketClosing); err != nil {
+				return nil, err
+			}
 			break
 		}
 
@@ -248,7 +250,9 @@ func (p *Parser) parseIndex(tokens []core.Token) (*core.Decl, error) {
 
 		// Closing bracket ?
 		if tokens[p.index].ID == core.TokenIDBracketClosing {
-			p.consumeToken(core.TokenIDBracketClosing)
+			if _, err := p.consumeToken(core.TokenIDBracketClosing); err != nil {
+				return nil, err
+			}
 			break
 		}
 
@@ -257,7 +261,7 @@ func (p *Parser) parseIndex(tokens []core.Token) (*core.Decl, error) {
 		for p.isNot(core.TokenIDBracketClosing, core.TokenIDComma) {
 			switch p.current().ID {
 			case core.TokenIDCollate:
-				collateDecl, err := p.consumeToken(core.TokenIDCollate)
+				collateDecl, err := (core.TokenIDCollate)
 				if err != nil {
 					return nil, p.syntaxError()
 				}
