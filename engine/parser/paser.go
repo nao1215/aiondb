@@ -11,7 +11,7 @@ import (
 // Parser is an interface introduced to comprehensively
 // parse the SQL syntax of common RDBMS (e.g. MySQL, SQLite, PostgreSQL, Oracle).
 type Parser interface {
-	Parse(input string) (string, error)
+	Parse(input string) ([]core.Statement, error)
 }
 
 // NewParser returns a new Parser.
