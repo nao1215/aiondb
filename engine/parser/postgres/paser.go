@@ -160,13 +160,13 @@ func (p *Parser) consumeToken(tokenTypes ...core.TokenID) (*core.Decl, error) {
 // syntaxError returns a syntax error.
 func (p *Parser) syntaxError() error {
 	if p.index == 0 {
-		return fmt.Errorf("Syntax error near %s %s",
+		return fmt.Errorf("syntax error near %s %s",
 			p.tokens[p.index].Lexeme, p.tokens[p.index+1].Lexeme)
 	} else if !p.hasNext() {
-		return fmt.Errorf("Syntax error near %s %s",
+		return fmt.Errorf("syntax error near %s %s",
 			p.tokens[p.index-1].Lexeme, p.tokens[p.index].Lexeme)
 	}
-	return fmt.Errorf("Syntax error near %s %s %s",
+	return fmt.Errorf("syntax error near %s %s %s",
 		p.tokens[p.index-1].Lexeme, p.tokens[p.index].Lexeme, p.tokens[p.index+1].Lexeme)
 }
 

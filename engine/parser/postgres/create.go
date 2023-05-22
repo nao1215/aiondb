@@ -221,7 +221,7 @@ func (p *Parser) parseIndex(tokens []core.Token) (*core.Decl, error) {
 
 	// ON
 	if !p.hasNext() || tokens[p.index].ID != core.TokenIDOn {
-		return nil, errors.New("Expected ON")
+		return nil, errors.New("expected ON")
 	}
 	p.index++
 
