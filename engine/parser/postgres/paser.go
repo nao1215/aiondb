@@ -233,7 +233,7 @@ func (p *Parser) parseAttribute() (*core.Decl, error) {
 	if quoted {
 		// Check there is a closing quote
 		if _, err := p.consumeToken(quoteToken); err != nil {
-			return nil, fmt.Errorf("expected closing quote: %s", err)
+			return nil, fmt.Errorf("expected closing quote: %w", err)
 		}
 	}
 	return attributeDecl, nil
