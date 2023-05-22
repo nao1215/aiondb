@@ -148,7 +148,9 @@ func (p *Parser) consumeToken(tokenTypes ...core.TokenID) (*core.Decl, error) {
 		return nil, p.syntaxError()
 	}
 	decl := core.NewDecl(p.tokens[p.index])
-	p.next()
+	if err := p.next(); err != nil {
+		return nil, err
+	}
 	return decl, nil
 }
 
@@ -263,7 +265,9 @@ func (p *Parser) parseQuotedToken() (*core.Decl, error) {
 			return nil, err
 		}
 	}
-	p.next()
+	if err := p.next(); err != nil {
+		return nil, err
+	}
 	return decl, nil
 }
 
