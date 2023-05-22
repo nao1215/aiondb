@@ -29,14 +29,12 @@ func (p *Parser) parseCreate(tokens []core.Token) (*core.Statement, error) {
 			return nil, err
 		}
 		createDecl.Append(d)
-		break
 	case core.TokenIDIndex:
 		d, err := p.parseIndex(tokens)
 		if err != nil {
 			return nil, err
 		}
 		createDecl.Append(d)
-		break
 	case core.TokenIDUnique:
 		u, err := p.consumeToken(core.TokenIDUnique)
 		if err != nil {
@@ -52,9 +50,8 @@ func (p *Parser) parseCreate(tokens []core.Token) (*core.Statement, error) {
 		}
 		d.Append(u)
 		createDecl.Append(d)
-		break
 	default:
-		return nil, fmt.Errorf("Parsing error near <%s>", tokens[p.index].Lexeme)
+		return nil, fmt.Errorf("parsing error near <%s>", tokens[p.index].Lexeme)
 	}
 	return stmt, nil
 }
@@ -78,7 +75,7 @@ func (p *Parser) parseTable(tokens []core.Token) (*core.Decl, error) {
 
 	// Now we should found brackets
 	if !p.hasNext() || tokens[p.index].ID != core.TokenIDBracketOpening {
-		return nil, errors.New("Table name token must be followed by table definition")
+		return nil, errors.New("table name token must be followed by table definition")
 	}
 	p.index++
 
@@ -144,14 +141,14 @@ func (p *Parser) parseTable(tokens []core.Token) (*core.Decl, error) {
 					newAttribute.Append(newPrimary)
 
 					if err = p.next(); err != nil {
-						return nil, errors.New("Unexpected end")
+						return nil, errors.New("unexpected end")
 					}
 
 					newKey := core.NewDecl(tokens[p.index])
 					newPrimary.Append(newKey)
 
 					if err = p.next(); err != nil {
-						return nil, errors.New("Unexpected end")
+						return nil, errors.New("unexpected end")
 					}
 				}
 			case core.TokenIDAutoincrement:
@@ -237,7 +234,7 @@ func (p *Parser) parseIndex(tokens []core.Token) (*core.Decl, error) {
 
 	// Now we should found brackets
 	if !p.hasNext() || tokens[p.index].ID != core.TokenIDBracketOpening {
-		return nil, errors.New("Table name token must be followed by table definition")
+		return nil, errors.New("table name token must be followed by table definition")
 	}
 	p.index++
 
@@ -343,12 +340,13 @@ func (p *Parser) parsePrimaryKey() (*core.Decl, error) {
 	}
 
 	for {
-		d, err := p.parseQuotedToken()
+		_, err := p.parseQuotedToken()
 		if err != nil {
 			return nil, err
 		}
 
-		if d, err = p.consumeToken(core.TokenIDComma, core.TokenIDBracketClosing); err != nil {
+		d, err := p.consumeToken(core.TokenIDComma, core.TokenIDBracketClosing)
+		if err != nil {
 			return nil, err
 		}
 		if d.TokenID == core.TokenIDBracketClosing {

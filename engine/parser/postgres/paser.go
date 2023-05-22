@@ -72,7 +72,6 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 				return nil, err
 			}
 			p.stmt = append(p.stmt, *s)
-			break
 		default:
 			// TODO: implement other statements
 		}
