@@ -128,15 +128,16 @@ func (p *Parser) isNot(tokenTypes ...core.TokenID) bool {
 
 // isNext returns true if the next token is one of the specified tokens.
 func (p *Parser) isNext(tokenTypes ...core.TokenID) (core.Token, error) {
+	t := core.Token{}
 	if !p.hasNext() {
-		return core.Token{}, p.syntaxError()
+		return t, p.syntaxError()
 	}
 	for _, tokenType := range tokenTypes {
 		if p.tokens[p.index+1].ID == tokenType {
 			return p.tokens[p.index+1], nil
 		}
 	}
-	return core.Token{}, p.syntaxError()
+	return t, p.syntaxError()
 }
 
 // current returns the current token.
