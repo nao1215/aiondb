@@ -6,6 +6,11 @@ type TokenID uint64
 // Lexeme is minimal meaningful unit of language.
 type Lexeme string
 
+// String returns string representation of Lexeme.
+func (l Lexeme) String() string {
+	return string(l)
+}
+
 const (
 	//=======================
 	// Punctuation token
