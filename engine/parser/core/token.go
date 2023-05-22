@@ -6,15 +6,6 @@ type TokenID uint64
 // Lexeme is minimal meaningful unit of language.
 type Lexeme string
 
-// Token in lexical analysis is the smallest unit
-// of meaning in a language.
-type Token struct {
-	// ID is the token ID.
-	ID TokenID
-	// Lexeme is the token lexeme.
-	Lexeme Lexeme
-}
-
 const (
 	//=======================
 	// Punctuation token
@@ -183,3 +174,22 @@ const (
 	// TokenIDDate is the token ID for date.
 	TokenIDDate TokenID = 406
 )
+
+// Token in lexical analysis is the smallest unit
+// of meaning in a language.
+type Token struct {
+	// ID is the token ID.
+	ID TokenID
+	// Lexeme is the token lexeme.
+	Lexeme Lexeme
+}
+
+// StripSpaces strips spaces from tokens.
+func StripSpaces(t []Token) (ret []Token) {
+	for i := range t {
+		if t[i].ID != TokenIDSpace {
+			ret = append(ret, t[i])
+		}
+	}
+	return ret
+}

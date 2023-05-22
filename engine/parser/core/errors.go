@@ -6,8 +6,12 @@ import (
 )
 
 var (
-	// ErrLexerSyntax means "syntax error in user input"
+	// ErrLexerSyntax means "lex syntax error in user input"
 	ErrLexerSyntax = errors.New("failed to lex instruction. syntax error")
+	// ErrParserSyntax means "parse syntax error in user input"
+	ErrParserSyntax = errors.New("failed to parse instruction. syntax error")
+	// ErrEndOfStatement means "end of statement"
+	ErrEndOfStatement = errors.New("end of statement")
 	// ErrNotDateFormat means input data is "not a date format"
 	ErrNotDateFormat = errors.New("not a date format")
 )
