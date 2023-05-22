@@ -95,11 +95,12 @@ func (p *Parser) hasNext() bool {
 
 // mustHaveNext returns the next token if it exists.
 func (p *Parser) mustHaveNext(tokenTypes ...core.TokenID) (core.Token, error) {
+	t := core.Token{}
 	if !p.hasNext() {
-		return core.Token{}, p.syntaxError()
+		return t, p.syntaxError()
 	}
 	if err := p.next(); err != nil {
-		return core.Token{}, err
+		return t, err
 	}
 
 	for _, tokenType := range tokenTypes {
@@ -107,7 +108,7 @@ func (p *Parser) mustHaveNext(tokenTypes ...core.TokenID) (core.Token, error) {
 			return p.tokens[p.index], nil
 		}
 	}
-	return core.Token{}, p.syntaxError()
+	return t, p.syntaxError()
 }
 
 // is returns true if the current token is one of the specified tokens.
