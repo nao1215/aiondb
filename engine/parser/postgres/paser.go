@@ -2,6 +2,7 @@
 package postgres
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/nao1215/aiondb/engine/parser/core"
@@ -93,12 +94,12 @@ func (p *Parser) hasNext() bool {
 }
 
 // mustHaveNext returns the next token if it exists.
-func (p *Parser) mustHaveNext(tokenTypes ...core.TokenID) (t core.Token, err error) {
+func (p *Parser) mustHaveNext(tokenTypes ...core.TokenID) (core.Token, error) {
 	if !p.hasNext() {
-		return t, p.syntaxError()
+		return core.Token{}, p.syntaxError()
 	}
-	if err = p.next(); err != nil {
-		return t, err
+	if err := p.next(); err != nil {
+		return core.Token{}, err
 	}
 
 	for _, tokenType := range tokenTypes {
@@ -106,7 +107,7 @@ func (p *Parser) mustHaveNext(tokenTypes ...core.TokenID) (t core.Token, err err
 			return p.tokens[p.index], nil
 		}
 	}
-	return t, p.syntaxError()
+	return core.Token{}, p.syntaxError()
 }
 
 // is returns true if the current token is one of the specified tokens.
@@ -125,16 +126,16 @@ func (p *Parser) isNot(tokenTypes ...core.TokenID) bool {
 }
 
 // isNext returns true if the next token is one of the specified tokens.
-func (p *Parser) isNext(tokenTypes ...core.TokenID) (t core.Token, err error) {
+func (p *Parser) isNext(tokenTypes ...core.TokenID) (core.Token, error) {
 	if !p.hasNext() {
-		return t, p.syntaxError()
+		return core.Token{}, p.syntaxError()
 	}
 	for _, tokenType := range tokenTypes {
 		if p.tokens[p.index+1].ID == tokenType {
 			return p.tokens[p.index+1], nil
 		}
 	}
-	return t, p.syntaxError()
+	return core.Token{}, p.syntaxError()
 }
 
 // current returns the current token.
@@ -312,7 +313,7 @@ func (p *Parser) parseStringLiteral() (*core.Decl, error) {
 	}
 
 	if (singleQuoted && p.is(core.TokenIDDoubleQuote)) || (!singleQuoted && p.is(core.TokenIDSingleQuote)) {
-		return nil, fmt.Errorf("quotation marks do not match")
+		return nil, errors.New("quotation marks do not match")
 	}
 	if _, err = p.consumeToken(core.TokenIDSingleQuote, core.TokenIDDoubleQuote); err != nil {
 		return nil, err

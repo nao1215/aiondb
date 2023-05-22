@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -43,7 +44,7 @@ func (p *Parser) parseCreate(tokens []core.Token) (*core.Statement, error) {
 		}
 		// should have index after unique here
 		if !p.hasNext() || tokens[p.index].ID != core.TokenIDIndex {
-			return nil, fmt.Errorf("expected INDEX after UNIQUE")
+			return nil, errors.New("expected INDEX after UNIQUE")
 		}
 		d, err := p.parseIndex(tokens)
 		if err != nil {
@@ -77,7 +78,7 @@ func (p *Parser) parseTable(tokens []core.Token) (*core.Decl, error) {
 
 	// Now we should found brackets
 	if !p.hasNext() || tokens[p.index].ID != core.TokenIDBracketOpening {
-		return nil, fmt.Errorf("Table name token must be followed by table definition")
+		return nil, errors.New("Table name token must be followed by table definition")
 	}
 	p.index++
 
@@ -143,14 +144,14 @@ func (p *Parser) parseTable(tokens []core.Token) (*core.Decl, error) {
 					newAttribute.Append(newPrimary)
 
 					if err = p.next(); err != nil {
-						return nil, fmt.Errorf("Unexpected end")
+						return nil, errors.New("Unexpected end")
 					}
 
 					newKey := core.NewDecl(tokens[p.index])
 					newPrimary.Append(newKey)
 
 					if err = p.next(); err != nil {
-						return nil, fmt.Errorf("Unexpected end")
+						return nil, errors.New("Unexpected end")
 					}
 				}
 			case core.TokenIDAutoincrement:
@@ -223,7 +224,7 @@ func (p *Parser) parseIndex(tokens []core.Token) (*core.Decl, error) {
 
 	// ON
 	if !p.hasNext() || tokens[p.index].ID != core.TokenIDOn {
-		return nil, fmt.Errorf("Expected ON")
+		return nil, errors.New("Expected ON")
 	}
 	p.index++
 
@@ -236,7 +237,7 @@ func (p *Parser) parseIndex(tokens []core.Token) (*core.Decl, error) {
 
 	// Now we should found brackets
 	if !p.hasNext() || tokens[p.index].ID != core.TokenIDBracketOpening {
-		return nil, fmt.Errorf("Table name token must be followed by table definition")
+		return nil, errors.New("Table name token must be followed by table definition")
 	}
 	p.index++
 
@@ -261,7 +262,7 @@ func (p *Parser) parseIndex(tokens []core.Token) (*core.Decl, error) {
 		for p.isNot(core.TokenIDBracketClosing, core.TokenIDComma) {
 			switch p.current().ID {
 			case core.TokenIDCollate:
-				collateDecl, err := (core.TokenIDCollate)
+				collateDecl, err := p.consumeToken(core.TokenIDCollate)
 				if err != nil {
 					return nil, p.syntaxError()
 				}
