@@ -399,7 +399,7 @@ func (p *Parser) parseJoin() (*core.Decl, error) {
 	}
 	onDecl.Append(equalAttr)
 
-	//ATTRIBUTE
+	// ATTRIBUTE
 	rightAttributeDecl, err := p.parseAttribute()
 	if err != nil {
 		return nil, err
@@ -423,17 +423,16 @@ func (p *Parser) parseIn() (*core.Decl, error) {
 	}
 
 	// list of value
-	gotList := false
 	for {
 		v, err := p.parseValue()
 		if err != nil {
 			return nil, err
 		}
 		inDecl.Append(v)
-		gotList = true
+		gotList := true
 
 		if p.is(core.TokenIDBracketClosing) {
-			if gotList == false {
+			if !gotList {
 				return nil, errors.New("in clause: empty list of value")
 			}
 			if _, err := p.consumeToken(core.TokenIDBracketClosing); err != nil {

@@ -8,7 +8,6 @@ import (
 
 // parseWhere parses the WHERE clause.
 func (p *Parser) parseWhere(selectDecl *core.Decl) error {
-
 	// May be WHERE  here
 	// Can be ORDER BY if WHERE cause if implicit
 	whereDecl, err := p.consumeToken(core.TokenIDWhere)
@@ -52,7 +51,10 @@ func (p *Parser) parseCondition() (*core.Decl, error) {
 	// We may have the WHERE 1 condition
 	if t := p.current(); t.ID == core.TokenIDNumber && t.Lexeme == "1" {
 		attributeDecl := core.NewDecl(t)
-		p.next()
+		if err := p.next(); err != nil {
+			return nil, err
+		}
+
 		// in case of 1 = 1
 		if p.current().ID == core.TokenIDEquality {
 			t, err := p.isNext(core.TokenIDNumber)
@@ -90,7 +92,6 @@ func (p *Parser) parseCondition() (*core.Decl, error) {
 			return nil, err
 		}
 		attributeDecl.Append(decl)
-		break
 	case core.TokenIDIn:
 		inDecl, err := p.parseIn()
 		if err != nil {
@@ -136,6 +137,7 @@ func (p *Parser) parseCondition() (*core.Decl, error) {
 			decl.Append(nullDecl)
 		}
 		return attributeDecl, nil
+	default:
 	}
 
 	// Value

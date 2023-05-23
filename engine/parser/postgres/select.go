@@ -81,7 +81,7 @@ func (p *Parser) parseSelect(tokens []core.Token) (*core.Statement, error) {
 			}
 			hazWhereClause = true
 		case core.TokenIDOrder:
-			if hazWhereClause == false {
+			if !hazWhereClause {
 				// WHERE clause is implicit
 				appendImplicitWhereAll(selectDecl)
 			}
