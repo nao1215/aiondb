@@ -12,8 +12,10 @@ var (
 	ErrParserSyntax = errors.New("failed to parse instruction. syntax error")
 	// ErrEndOfStatement means "end of statement"
 	ErrEndOfStatement = errors.New("end of statement")
-	// ErrParseAfterCreateToken means "parse after 'create' token"
+	// ErrParseAfterCreateToken means "parse error after 'create' token"
 	ErrParseAfterCreateToken = errors.New("'create' token must be followed by 'token', 'index'")
+	// ErrParseAfterSelectToken means "parse error after 'select' token"
+	ErrParseAfterSelectToken = errors.New("'select' token must be followed by attributes to select")
 	// ErrNotDateFormat means input data is "not a date format"
 	ErrNotDateFormat = errors.New("not a date format")
 )
