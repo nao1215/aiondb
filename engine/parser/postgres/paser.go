@@ -72,6 +72,12 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 				return nil, err
 			}
 			p.stmt = append(p.stmt, *s)
+		case core.TokenIDSelect:
+			stmt, err := p.parseSelect(tokens)
+			if err != nil {
+				return nil, err
+			}
+			p.stmt = append(p.stmt, *stmt)
 		default:
 			// TODO: implement other statements
 		}
@@ -302,6 +308,7 @@ func (p *Parser) parseType() (*core.Decl, error) {
 	return typeDecl, nil
 }
 
+// parseStringLiteral parse a string literal of the form.
 func (p *Parser) parseStringLiteral() (*core.Decl, error) {
 	singleQuoted := p.is(core.TokenIDSingleQuote)
 	_, err := p.consumeToken(core.TokenIDSingleQuote, core.TokenIDDoubleQuote)
@@ -319,6 +326,150 @@ func (p *Parser) parseStringLiteral() (*core.Decl, error) {
 	}
 	if _, err = p.consumeToken(core.TokenIDSingleQuote, core.TokenIDDoubleQuote); err != nil {
 		return nil, err
+	}
+	return valueDecl, nil
+}
+
+// parseBuiltinFunc parse a builtin function(COUNT, MAX, MIN) of the form.
+func (p *Parser) parseBuiltinFunc() (*core.Decl, error) {
+	// COUNT(attribute)
+	if !p.is(core.TokenIDCount) {
+		return &core.Decl{}, nil
+	}
+
+	d, err := p.consumeToken(core.TokenIDCount)
+	if err != nil {
+		return nil, err
+	}
+
+	// Bracket
+	_, err = p.consumeToken(core.TokenIDBracketOpening)
+	if err != nil {
+		return nil, err
+	}
+
+	// Attribute
+	attr, err := p.parseAttribute()
+	if err != nil {
+		return nil, err
+	}
+	d.Append(attr)
+
+	// Bracket
+	_, err = p.consumeToken(core.TokenIDBracketClosing)
+	if err != nil {
+		return nil, err
+	}
+	return d, nil
+}
+
+// parseJoin parses the JOIN keywords and all its condition
+// JOIN user_addresses ON address.id=user_addresses.address_id
+func (p *Parser) parseJoin() (*core.Decl, error) {
+	joinDecl, err := p.consumeToken(core.TokenIDJoin)
+	if err != nil {
+		return nil, err
+	}
+
+	// TABLE NAME
+	tableDecl, err := p.parseAttribute()
+	if err != nil {
+		return nil, err
+	}
+	joinDecl.Append(tableDecl)
+
+	// ON
+	onDecl, err := p.consumeToken(core.TokenIDOn)
+	if err != nil {
+		return nil, err
+	}
+	joinDecl.Append(onDecl)
+
+	// ATTRIBUTE
+	leftAttributeDecl, err := p.parseAttribute()
+	if err != nil {
+		return nil, err
+	}
+	onDecl.Append(leftAttributeDecl)
+
+	// EQUAL
+	equalAttr, err := p.consumeToken(core.TokenIDEquality)
+	if err != nil {
+		return nil, err
+	}
+	onDecl.Append(equalAttr)
+
+	// ATTRIBUTE
+	rightAttributeDecl, err := p.parseAttribute()
+	if err != nil {
+		return nil, err
+	}
+	onDecl.Append(rightAttributeDecl)
+
+	return joinDecl, nil
+}
+
+// parseIn parses the IN keywords and all its condition
+func (p *Parser) parseIn() (*core.Decl, error) {
+	inDecl, err := p.consumeToken(core.TokenIDIn)
+	if err != nil {
+		return nil, err
+	}
+
+	// bracket opening
+	_, err = p.consumeToken(core.TokenIDBracketOpening)
+	if err != nil {
+		return nil, err
+	}
+
+	// list of value
+	for {
+		v, err := p.parseValue()
+		if err != nil {
+			return nil, err
+		}
+		inDecl.Append(v)
+		gotList := true
+
+		if p.is(core.TokenIDBracketClosing) {
+			if !gotList {
+				return nil, errors.New("in clause: empty list of value")
+			}
+			if _, err := p.consumeToken(core.TokenIDBracketClosing); err != nil {
+				return nil, err
+			}
+			break
+		}
+
+		_, err = p.consumeToken(core.TokenIDComma)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return inDecl, nil
+}
+
+// parseValue parses a value of the form.
+func (p *Parser) parseValue() (*core.Decl, error) {
+	quoted := false
+
+	if p.is(core.TokenIDSingleQuote) || p.is(core.TokenIDDoubleQuote) {
+		quoted = true
+		_, err := p.consumeToken(core.TokenIDSingleQuote, core.TokenIDDoubleQuote)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	valueDecl, err := p.consumeToken(core.TokenIDString, core.TokenIDNumber, core.TokenIDDate, core.TokenIDNow)
+	if err != nil {
+		return nil, err
+	}
+	if quoted {
+		_, err := p.consumeToken(core.TokenIDSingleQuote, core.TokenIDDoubleQuote)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return valueDecl, nil
 }
