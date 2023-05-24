@@ -108,7 +108,13 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 				return nil, err
 			}
 			p.stmt = append(p.stmt, *stmt)
-			// TODO: implement other statements
+		case core.TokenIDExplain:
+			break
+		case core.TokenIDGrant:
+			stmt := &core.Statement{}
+			stmt.Decls = append(stmt.Decls, core.NewDecl(core.Token{ID: core.TokenIDGrant, Lexeme: core.Lexeme("grant")}))
+			p.stmt = append(p.stmt, *stmt)
+			return p.stmt, nil
 		default:
 			return nil, fmt.Errorf("parsing error near <%s>", tokens[p.index].Lexeme)
 		}
