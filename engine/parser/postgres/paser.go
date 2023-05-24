@@ -96,6 +96,12 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 				return nil, err
 			}
 			p.stmt = append(p.stmt, *stmt)
+		case core.TokenIDTruncate:
+			stmt, err := p.parseTruncate()
+			if err != nil {
+				return nil, err
+			}
+			p.stmt = append(p.stmt, *stmt)
 			// TODO: implement other statements
 		default:
 			return nil, fmt.Errorf("parsing error near <%s>", tokens[p.index].Lexeme)
@@ -493,131 +499,6 @@ func (p *Parser) parseValue() (*core.Decl, error) {
 	return valueDecl, nil
 }
 
-// parseInsert parses an INSERT statement.
-//
-// The generated AST is as follows:
-//
-//	|-> "INSERT" (InsertToken)
-//	    |-> "INTO" (IntoToken)
-//	        |-> table name
-//	            |-> column name
-//	            |-> (...)
-//	    |-> "VALUES" (ValuesToken)
-//	        |-> "(" (BracketOpeningToken)
-//	            |-> value
-//	            |-> (...)
-//	        |-> (...)
-//	    |-> "RETURNING" (ReturningToken) (optional)
-//	        |-> column name
-func (p *Parser) parseInsert() (*core.Statement, error) {
-	stmt := &core.Statement{}
-
-	// Set INSERT decl
-	insertDecl, err := p.consumeToken(core.TokenIDInsert)
-	if err != nil {
-		return nil, err
-	}
-	stmt.Decls = append(stmt.Decls, insertDecl)
-
-	// should be INTO
-	intoDecl, err := p.consumeToken(core.TokenIDInto)
-	if err != nil {
-		return nil, err
-	}
-	insertDecl.Append(intoDecl)
-
-	// should be table Name
-	tableDecl, err := p.parseQuotedToken()
-	if err != nil {
-		return nil, err
-	}
-	intoDecl.Append(tableDecl)
-
-	_, err = p.consumeToken(core.TokenIDBracketOpening)
-	if err != nil {
-		return nil, err
-	}
-
-	// concerned attribute
-	for {
-		decl, err := p.parseListElement()
-		if err != nil {
-			return nil, err
-		}
-		tableDecl.Append(decl)
-
-		if p.is(core.TokenIDBracketClosing) {
-			if _, err = p.consumeToken(core.TokenIDBracketClosing); err != nil {
-				return nil, err
-			}
-
-			break
-		}
-
-		_, err = p.consumeToken(core.TokenIDComma)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// should be VALUES
-	valuesDecl, err := p.consumeToken(core.TokenIDValues)
-	if err != nil {
-		return nil, err
-	}
-	insertDecl.Append(valuesDecl)
-
-	for {
-		openingBracketDecl, err := p.consumeToken(core.TokenIDBracketOpening)
-		if err != nil {
-			return nil, err
-		}
-		valuesDecl.Append(openingBracketDecl)
-
-		// should be a list of values for specified attributes
-		for {
-			decl, err := p.parseListElement()
-			if err != nil {
-				return nil, err
-			}
-			openingBracketDecl.Append(decl)
-
-			if p.is(core.TokenIDBracketClosing) {
-				if _, err := p.consumeToken(core.TokenIDBracketClosing); err != nil {
-					return nil, err
-				}
-				break
-			}
-
-			_, err = p.consumeToken(core.TokenIDComma)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		if p.is(core.TokenIDComma) {
-			if _, err := p.consumeToken(core.TokenIDComma); err != nil {
-				return nil, err
-			}
-			continue
-		}
-		break
-	}
-
-	// we may have `returning "something"` here
-	if retDecl, err := p.consumeToken(core.TokenIDReturning); err == nil {
-		insertDecl.Append(retDecl)
-
-		// returned attribute
-		attrDecl, err := p.parseAttribute()
-		if err != nil {
-			return nil, err
-		}
-		retDecl.Append(attrDecl)
-	}
-	return stmt, nil
-}
-
 // parseListElement parses a list element of the form.
 func (p *Parser) parseListElement() (*core.Decl, error) {
 	quoted := false
@@ -649,58 +530,6 @@ func (p *Parser) parseListElement() (*core.Decl, error) {
 		}
 	}
 	return valueDecl, nil
-}
-
-// parseUpdate parses an UPDATE statement.
-func (p *Parser) parseUpdate() (*core.Statement, error) {
-	stmt := &core.Statement{}
-
-	// Set DELETE decl
-	updateDecl, err := p.consumeToken(core.TokenIDUpdate)
-	if err != nil {
-		return nil, err
-	}
-	stmt.Decls = append(stmt.Decls, updateDecl)
-
-	// should be table name
-	nameDecl, err := p.parseQuotedToken()
-	if err != nil {
-		return nil, err
-	}
-	updateDecl.Append(nameDecl)
-
-	// should be SET
-	setDecl, err := p.consumeToken(core.TokenIDSet)
-	if err != nil {
-		return nil, err
-	}
-	updateDecl.Append(setDecl)
-
-	// should be a list of equality
-	gotClause := false
-	for p.tokens[p.index].ID != core.TokenIDWhere {
-		if !p.hasNext() && gotClause {
-			break
-		}
-
-		attributeDecl, err := p.parseAttribution()
-		if err != nil {
-			return nil, err
-		}
-		setDecl.Append(attributeDecl)
-		if _, err := p.consumeToken(core.TokenIDComma); err != nil {
-			return nil, err
-		}
-
-		// Got at least one clause
-		gotClause = true
-	}
-
-	err = p.parseWhere(updateDecl)
-	if err != nil {
-		return nil, err
-	}
-	return stmt, nil
 }
 
 // parseAttribution parses an attribution of the form `attribute = value`.
