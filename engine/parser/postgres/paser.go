@@ -84,6 +84,12 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 				return nil, err
 			}
 			p.stmt = append(p.stmt, *i)
+		case core.TokenIDUpdate:
+			i, err := p.parseUpdate()
+			if err != nil {
+				return nil, err
+			}
+			p.stmt = append(p.stmt, *i)
 			// TODO: implement other statements
 		default:
 			return nil, fmt.Errorf("parsing error near <%s>", tokens[p.index].Lexeme)
@@ -637,4 +643,90 @@ func (p *Parser) parseListElement() (*core.Decl, error) {
 		}
 	}
 	return valueDecl, nil
+}
+
+// parseUpdate parses an UPDATE statement.
+func (p *Parser) parseUpdate() (*core.Statement, error) {
+	stmt := &core.Statement{}
+
+	// Set DELETE decl
+	updateDecl, err := p.consumeToken(core.TokenIDUpdate)
+	if err != nil {
+		return nil, err
+	}
+	stmt.Decls = append(stmt.Decls, updateDecl)
+
+	// should be table name
+	nameDecl, err := p.parseQuotedToken()
+	if err != nil {
+		return nil, err
+	}
+	updateDecl.Append(nameDecl)
+
+	// should be SET
+	setDecl, err := p.consumeToken(core.TokenIDSet)
+	if err != nil {
+		return nil, err
+	}
+	updateDecl.Append(setDecl)
+
+	// should be a list of equality
+	gotClause := false
+	for p.tokens[p.index].ID != core.TokenIDWhere {
+		if !p.hasNext() && gotClause {
+			break
+		}
+
+		attributeDecl, err := p.parseAttribution()
+		if err != nil {
+			return nil, err
+		}
+		setDecl.Append(attributeDecl)
+		if _, err := p.consumeToken(core.TokenIDComma); err != nil {
+			return nil, err
+		}
+
+		// Got at least one clause
+		gotClause = true
+	}
+
+	err = p.parseWhere(updateDecl)
+	if err != nil {
+		return nil, err
+	}
+	return stmt, nil
+}
+
+// parseAttribution parses an attribution of the form `attribute = value`.
+func (p *Parser) parseAttribution() (*core.Decl, error) {
+	// Attribute
+	attributeDecl, err := p.parseAttribute()
+	if err != nil {
+		return nil, err
+	}
+
+	// Equals operator
+	if p.current().ID == core.TokenIDEquality {
+		decl, err := p.consumeToken(p.current().ID)
+		if err != nil {
+			return nil, err
+		}
+		attributeDecl.Append(decl)
+	}
+
+	// Value
+	if p.current().ID == core.TokenIDNull {
+		nullDecl, err := p.consumeToken(core.TokenIDNull)
+		if err != nil {
+			return nil, err
+		}
+		attributeDecl.Append(nullDecl)
+	} else {
+		valueDecl, err := p.parseValue()
+		if err != nil {
+			return nil, err
+		}
+		attributeDecl.Append(valueDecl)
+	}
+	return attributeDecl, nil
 }
