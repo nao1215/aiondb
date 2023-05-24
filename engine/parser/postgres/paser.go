@@ -621,7 +621,9 @@ func (p *Parser) parseListElement() (*core.Decl, error) {
 
 	if p.is(core.TokenIDSingleQuote) || p.is(core.TokenIDDoubleQuote) {
 		quoted = true
-		p.next()
+		if err := p.next(); err != nil {
+			return nil, err
+		}
 	}
 
 	var valueDecl *core.Decl
