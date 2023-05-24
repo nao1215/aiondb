@@ -78,8 +78,15 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 				return nil, err
 			}
 			p.stmt = append(p.stmt, *stmt)
-		default:
+		case core.TokenIDInsert:
+			i, err := p.parseInsert()
+			if err != nil {
+				return nil, err
+			}
+			p.stmt = append(p.stmt, *i)
 			// TODO: implement other statements
+		default:
+			return nil, fmt.Errorf("parsing error near <%s>", tokens[p.index].Lexeme)
 		}
 	}
 	return p.stmt, nil
@@ -468,6 +475,162 @@ func (p *Parser) parseValue() (*core.Decl, error) {
 	if quoted {
 		_, err := p.consumeToken(core.TokenIDSingleQuote, core.TokenIDDoubleQuote)
 		if err != nil {
+			return nil, err
+		}
+	}
+	return valueDecl, nil
+}
+
+// parseInsert parses an INSERT statement.
+//
+// The generated AST is as follows:
+//
+//	|-> "INSERT" (InsertToken)
+//	    |-> "INTO" (IntoToken)
+//	        |-> table name
+//	            |-> column name
+//	            |-> (...)
+//	    |-> "VALUES" (ValuesToken)
+//	        |-> "(" (BracketOpeningToken)
+//	            |-> value
+//	            |-> (...)
+//	        |-> (...)
+//	    |-> "RETURNING" (ReturningToken) (optional)
+//	        |-> column name
+func (p *Parser) parseInsert() (*core.Statement, error) {
+	stmt := &core.Statement{}
+
+	// Set INSERT decl
+	insertDecl, err := p.consumeToken(core.TokenIDInsert)
+	if err != nil {
+		return nil, err
+	}
+	stmt.Decls = append(stmt.Decls, insertDecl)
+
+	// should be INTO
+	intoDecl, err := p.consumeToken(core.TokenIDInto)
+	if err != nil {
+		return nil, err
+	}
+	insertDecl.Append(intoDecl)
+
+	// should be table Name
+	tableDecl, err := p.parseQuotedToken()
+	if err != nil {
+		return nil, err
+	}
+	intoDecl.Append(tableDecl)
+
+	_, err = p.consumeToken(core.TokenIDBracketOpening)
+	if err != nil {
+		return nil, err
+	}
+
+	// concerned attribute
+	for {
+		decl, err := p.parseListElement()
+		if err != nil {
+			return nil, err
+		}
+		tableDecl.Append(decl)
+
+		if p.is(core.TokenIDBracketClosing) {
+			if _, err = p.consumeToken(core.TokenIDBracketClosing); err != nil {
+				return nil, err
+			}
+
+			break
+		}
+
+		_, err = p.consumeToken(core.TokenIDComma)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// should be VALUES
+	valuesDecl, err := p.consumeToken(core.TokenIDValues)
+	if err != nil {
+		return nil, err
+	}
+	insertDecl.Append(valuesDecl)
+
+	for {
+		openingBracketDecl, err := p.consumeToken(core.TokenIDBracketOpening)
+		if err != nil {
+			return nil, err
+		}
+		valuesDecl.Append(openingBracketDecl)
+
+		// should be a list of values for specified attributes
+		for {
+			decl, err := p.parseListElement()
+			if err != nil {
+				return nil, err
+			}
+			openingBracketDecl.Append(decl)
+
+			if p.is(core.TokenIDBracketClosing) {
+				if _, err := p.consumeToken(core.TokenIDBracketClosing); err != nil {
+					return nil, err
+				}
+				break
+			}
+
+			_, err = p.consumeToken(core.TokenIDComma)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if p.is(core.TokenIDComma) {
+			if _, err := p.consumeToken(core.TokenIDComma); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		break
+	}
+
+	// we may have `returning "something"` here
+	if retDecl, err := p.consumeToken(core.TokenIDReturning); err == nil {
+		insertDecl.Append(retDecl)
+
+		// returned attribute
+		attrDecl, err := p.parseAttribute()
+		if err != nil {
+			return nil, err
+		}
+		retDecl.Append(attrDecl)
+	}
+	return stmt, nil
+}
+
+// parseListElement parses a list element of the form.
+func (p *Parser) parseListElement() (*core.Decl, error) {
+	quoted := false
+
+	// In case of INSERT, can be DEFAULT here
+	if p.is(core.TokenIDDefault) {
+		v, err := p.consumeToken(core.TokenIDDefault)
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+
+	if p.is(core.TokenIDSingleQuote) || p.is(core.TokenIDDoubleQuote) {
+		quoted = true
+		p.next()
+	}
+
+	var valueDecl *core.Decl
+	valueDecl, err := p.consumeToken(core.TokenIDString, core.TokenIDNumber, core.TokenIDNull, core.TokenIDDate, core.TokenIDNow)
+	if err != nil {
+		return nil, err
+	}
+	if quoted {
+		if _, err := p.consumeToken(core.TokenIDSingleQuote, core.TokenIDDoubleQuote); err != nil {
 			return nil, err
 		}
 	}
