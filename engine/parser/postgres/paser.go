@@ -109,7 +109,7 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 			}
 			p.stmt = append(p.stmt, *stmt)
 		case core.TokenIDExplain:
-			break
+			// No check for explain, it is a single token
 		case core.TokenIDGrant:
 			stmt := &core.Statement{}
 			stmt.Decls = append(stmt.Decls, core.NewDecl(core.Token{ID: core.TokenIDGrant, Lexeme: core.Lexeme("grant")}))
