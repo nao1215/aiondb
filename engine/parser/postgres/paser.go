@@ -67,11 +67,11 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 		// CREATE, SELECT, INSERT, UPDATE, DELETE, TRUNCATE, DROP, EXPLAIN
 		switch tokens[p.index].ID {
 		case core.TokenIDCreate:
-			s, err := p.parseCreate(tokens)
+			stmt, err := p.parseCreate(tokens)
 			if err != nil {
 				return nil, err
 			}
-			p.stmt = append(p.stmt, *s)
+			p.stmt = append(p.stmt, *stmt)
 		case core.TokenIDSelect:
 			stmt, err := p.parseSelect(tokens)
 			if err != nil {
@@ -79,17 +79,23 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 			}
 			p.stmt = append(p.stmt, *stmt)
 		case core.TokenIDInsert:
-			i, err := p.parseInsert()
+			stmt, err := p.parseInsert()
 			if err != nil {
 				return nil, err
 			}
-			p.stmt = append(p.stmt, *i)
+			p.stmt = append(p.stmt, *stmt)
 		case core.TokenIDUpdate:
-			i, err := p.parseUpdate()
+			stmt, err := p.parseUpdate()
 			if err != nil {
 				return nil, err
 			}
-			p.stmt = append(p.stmt, *i)
+			p.stmt = append(p.stmt, *stmt)
+		case core.TokenIDDelete:
+			stmt, err := p.parseDelete()
+			if err != nil {
+				return nil, err
+			}
+			p.stmt = append(p.stmt, *stmt)
 			// TODO: implement other statements
 		default:
 			return nil, fmt.Errorf("parsing error near <%s>", tokens[p.index].Lexeme)
