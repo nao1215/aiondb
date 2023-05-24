@@ -102,6 +102,12 @@ func (p *Parser) parse(tokens []core.Token) ([]core.Statement, error) {
 				return nil, err
 			}
 			p.stmt = append(p.stmt, *stmt)
+		case core.TokenIDDrop:
+			stmt, err := p.parseDrop()
+			if err != nil {
+				return nil, err
+			}
+			p.stmt = append(p.stmt, *stmt)
 			// TODO: implement other statements
 		default:
 			return nil, fmt.Errorf("parsing error near <%s>", tokens[p.index].Lexeme)
