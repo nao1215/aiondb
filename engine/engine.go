@@ -1,3 +1,6 @@
+// Package engine contains the main engine of AION DB.
+// It is responsible for listening for new connections, parsing the SQL statements and executing them.
+// It also contains the relations and the operations executors.
 package engine
 
 import (
@@ -47,12 +50,12 @@ func New(endpoint protocol.EngineEndpoint) (e *Engine, err error) {
 		// core.TokenIDInsert:   insertIntoTableExecutor,
 		// core.TokenIDDelete:   deleteExecutor,
 		// core.TokenIDUpdate:   updateExecutor,
-		// core.TokenIDIf:       ifExecutor,
-		// core.TokenIDNot:      notExecutor,
-		// core.TokenIDExists:   existsExecutor,
-		// core.TokenIDTruncate: truncateExecutor,
-		// core.TokenIDDrop:     dropExecutor,
-		core.TokenIDGrant: grantExecutor,
+		core.TokenIDIf:       ifExecutor,
+		core.TokenIDNot:      notExecutor,
+		core.TokenIDExists:   existsExecutor,
+		core.TokenIDTruncate: truncateExecutor,
+		core.TokenIDDrop:     dropExecutor,
+		core.TokenIDGrant:    grantExecutor,
 	}
 	e.relations = make(map[string]*Relation)
 	e.parser = parser.NewParser(core.SQLSyntaxModePostgreSQL)
@@ -128,14 +131,14 @@ func (e *Engine) handleConnection(conn protocol.EngineConn) {
 		stmtList, err := e.parser.Parse(stmt)
 		if err != nil {
 			// TODO: handle error
-			conn.WriteError(err) //nolint:errcheck
+			conn.WriteError(err) //nolint
 			continue
 		}
 
 		err = e.executeQueries(stmtList, conn)
 		if err != nil {
 			// TODO: handle error
-			conn.WriteError(err) //nolint:errcheck
+			conn.WriteError(err) //nolint
 			continue
 		}
 	}

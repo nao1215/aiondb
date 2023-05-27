@@ -22,3 +22,11 @@ func NewRelation(t *Table) *Relation {
 	}
 	return r
 }
+
+// Insert a tuple in relation
+func (r *Relation) Insert(t *Tuple) error {
+	// Maybe do somthing like lock read/write here
+	// Maybe index
+	r.rows = append(r.rows, t)
+	return nil
+}
