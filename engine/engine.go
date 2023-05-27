@@ -90,8 +90,6 @@ func (e *Engine) listen() {
 		select {
 		case conn := <-newConnectionChannel:
 			go e.handleConnection(conn)
-			break
-
 		case <-e.stop:
 			e.endpoint.Close()
 			return

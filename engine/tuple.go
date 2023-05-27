@@ -9,9 +9,7 @@ type Tuple struct {
 // NewTuple should check that value are for the right Attribute and match domain.
 func NewTuple(values ...interface{}) *Tuple {
 	t := &Tuple{}
-	for _, v := range values {
-		t.Values = append(t.Values, v)
-	}
+	t.Values = append(t.Values, values...)
 	return t
 }
 

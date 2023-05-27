@@ -18,8 +18,7 @@ func dropExecutor(e *Engine, dropDecl *core.Decl, conn protocol.EngineConn) erro
 	}
 
 	table := dropDecl.DeclList[0].DeclList[0].Lexeme.String()
-	r := e.relation(table)
-	if r == nil {
+	if r := e.relation(table); r == nil {
 		return fmt.Errorf("relation '%s' not found", table)
 	}
 	e.drop(table)
