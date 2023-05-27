@@ -60,16 +60,13 @@ func New(endpoint protocol.EngineEndpoint) (e *Engine, err error) {
 	e.relations = make(map[string]*Relation)
 	e.parser = parser.NewParser(core.SQLSyntaxModePostgreSQL)
 
-	if err = e.start(); err != nil {
-		return nil, err
-	}
+	e.start()
 	return
 }
 
 // start starts the listening loop.
-func (e *Engine) start() (err error) {
+func (e *Engine) start() {
 	go e.listen()
-	return nil
 }
 
 // listen listens for new connections.
