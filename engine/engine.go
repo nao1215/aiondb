@@ -41,7 +41,7 @@ func New(endpoint protocol.EngineEndpoint) (e *Engine, err error) {
 
 	e.stop = make(chan bool)
 	e.opsExecutors = map[core.TokenID]executor{
-		// core.TokenIDCreate:   createExecutor,
+		core.TokenIDCreate: createExecutor,
 		// core.TokenIDTable:    createTableExecutor,
 		// core.TokenIDSelect:   selectExecutor,
 		// core.TokenIDInsert:   insertIntoTableExecutor,
@@ -52,7 +52,7 @@ func New(endpoint protocol.EngineEndpoint) (e *Engine, err error) {
 		// core.TokenIDExists:   existsExecutor,
 		// core.TokenIDTruncate: truncateExecutor,
 		// core.TokenIDDrop:     dropExecutor,
-		// core.TokenIDGrant:    grantExecutor,
+		core.TokenIDGrant: grantExecutor,
 	}
 	e.relations = make(map[string]*Relation)
 	e.parser = parser.NewParser(core.SQLSyntaxModePostgreSQL)
@@ -164,5 +164,36 @@ func (e *Engine) executeQuery(stmt core.Statement, conn protocol.EngineConn) err
 	if e.opsExecutors[stmt.Decls[0].TokenID] != nil {
 		return e.opsExecutors[stmt.Decls[0].TokenID](e, stmt.Decls[0], conn)
 	}
-	return errors.New("Not Implemented")
+	return errors.New("not implemented")
+}
+
+// relation returns the relation with the given name.
+func (e *Engine) relation(name string) *Relation {
+	e.Lock()
+	r := e.relations[name]
+	e.Unlock()
+	return r
+}
+
+func (e *Engine) drop(name string) {
+	e.Lock()
+	delete(e.relations, name)
+	e.Unlock()
+}
+
+// createExecutor executes a CREATE statement.
+func createExecutor(e *Engine, createDecl *core.Decl, conn protocol.EngineConn) error {
+	if len(createDecl.DeclList) == 0 {
+		return errors.New("parsing failed, no declaration after CREATE")
+	}
+
+	if e.opsExecutors[createDecl.DeclList[0].TokenID] != nil {
+		return e.opsExecutors[createDecl.DeclList[0].TokenID](e, createDecl.DeclList[0], conn)
+	}
+	return errors.New("parsing failed, unknown token " + createDecl.DeclList[0].Lexeme.String())
+}
+
+// grantExecutor executes a GRANT statement.
+func grantExecutor(_ *Engine, _ *core.Decl, conn protocol.EngineConn) error {
+	return conn.WriteResult(0, 0)
 }
