@@ -117,7 +117,7 @@ func (e *Engine) Stop() {
 func (e *Engine) handleConnection(conn protocol.EngineConn) {
 	for {
 		stmt, err := conn.ReadStatement()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			// TODO: close engine if there is no conn left
 			return
 		}
