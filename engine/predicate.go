@@ -23,11 +23,6 @@ type Predicate struct {
 	True bool
 }
 
-// TruePredicate is a predicate which return always true
-var TruePredicate = Predicate{
-	True: true,
-}
-
 // String returns a string representation of the predicate
 func (p Predicate) String() string {
 	var left, right string
@@ -74,7 +69,7 @@ func (p *Predicate) Evaluate(t *Tuple, table *Table) (bool, error) {
 	}
 
 	// Find left
-	var i = 0
+	var i int
 	lenTable := len(table.attributes)
 	for i = 0; i < lenTable; i++ {
 		if table.attributes[i].name == p.LeftValue.lexeme {

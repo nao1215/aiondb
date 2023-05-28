@@ -45,7 +45,7 @@ func deleteRows(e *Engine, tables []*Table, conn protocol.EngineConn, predicates
 			if res, err = predicate.Evaluate(r.rows[i], r.table); err != nil {
 				return err
 			}
-			if res == false {
+			if !res {
 				ok = false
 				continue
 			}

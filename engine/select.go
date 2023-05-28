@@ -8,7 +8,7 @@ import (
 
 // fromExecutor returns a slice of tables from a FROM declaration
 func fromExecutor(fromDecl *core.Decl) []*Table {
-	var tables []*Table
+	tables := make([]*Table, len(fromDecl.DeclList))
 	for _, t := range fromDecl.DeclList {
 		tables = append(tables, NewTable(t.Lexeme.String()))
 	}
@@ -17,7 +17,7 @@ func fromExecutor(fromDecl *core.Decl) []*Table {
 
 // whereExecutor returns a slice of predicates from a WHERE declaration.
 func whereExecutor(whereDecl *core.Decl, fromTableName string) ([]Predicate, error) {
-	var predicates []Predicate
+	predicates := make([]Predicate, len(whereDecl.DeclList))
 	var err error
 	whereDecl.String(0)
 
@@ -28,7 +28,7 @@ func whereExecutor(whereDecl *core.Decl, fromTableName string) ([]Predicate, err
 
 		// 1 PREDICATE
 		if cond.Lexeme == "1" {
-			predicates = append(predicates, TruePredicate)
+			predicates = append(predicates, Predicate{True: true})
 			continue
 		}
 
@@ -87,6 +87,7 @@ func whereExecutor(whereDecl *core.Decl, fromTableName string) ([]Predicate, err
 			continue
 		}
 
+		// 2 is the minimum number of elements in a predicate
 		if len(cond.DeclList) < 2 {
 			return nil, fmt.Errorf("malformed predicate \"%s\"", cond.Lexeme)
 		}
@@ -117,12 +118,11 @@ func inExecutor(inDecl *core.Decl, p *Predicate) error {
 	p.Operator = inOperator
 
 	// Put everything in a []string
-	var values []string
+	values := make([]string, len(inDecl.DeclList))
 	for i := range inDecl.DeclList {
 		values = append(values, inDecl.DeclList[i].Lexeme.String())
 	}
 	p.RightValue.v = values
-
 	return nil
 }
 
@@ -132,7 +132,7 @@ func notInExecutor(inDecl *core.Decl, p *Predicate) error {
 	p.Operator = notInOperator
 
 	// Put everything in a []string
-	var values []string
+	values := make([]string, len(inDecl.DeclList))
 	for i := range inDecl.DeclList {
 		values = append(values, inDecl.DeclList[i].Lexeme.String())
 	}

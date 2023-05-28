@@ -34,7 +34,7 @@ func NewOperator(token core.TokenID, lexeme string) (Operator, error) {
 func toDate(t interface{}) (time.Time, error) {
 	switch t := t.(type) {
 	case string:
-		d, err := core.ParseDate(string(t))
+		d, err := core.ParseDate(t)
 		if err != nil {
 			return time.Time{}, fmt.Errorf("cannot parse date %v", t)
 		}
@@ -48,13 +48,13 @@ func toDate(t interface{}) (time.Time, error) {
 func toFloat(t interface{}) (float64, error) {
 	switch t := t.(type) {
 	case float64:
-		return float64(t), nil
+		return t, nil
 	case int64:
-		return float64(int64(t)), nil
+		return float64(t), nil
 	case int:
-		return float64(int(t)), nil
+		return float64(t), nil
 	case string:
-		return strconv.ParseFloat(string(t), 64)
+		return strconv.ParseFloat(t, 64)
 	default:
 		return 0, fmt.Errorf("unexpected internal type %T", t)
 	}
@@ -147,18 +147,12 @@ func lessThanOperator(leftValue Value, rightValue Value) bool {
 
 // equalityOperator checks if given value are equal
 func equalityOperator(leftValue Value, rightValue Value) bool {
-	if fmt.Sprintf("%v", leftValue.v) == rightValue.lexeme {
-		return true
-	}
-	return false
+	return fmt.Sprintf("%v", leftValue.v) == rightValue.lexeme
 }
 
 // distinctnessOperator checks if given value are distinct
 func distinctnessOperator(leftValue Value, rightValue Value) bool {
-	if fmt.Sprintf("%v", leftValue.v) != rightValue.lexeme {
-		return true
-	}
-	return false
+	return fmt.Sprintf("%v", leftValue.v) != rightValue.lexeme
 }
 
 // TrueOperator always returns true
