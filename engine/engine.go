@@ -48,7 +48,7 @@ func New(endpoint protocol.EngineEndpoint) (e *Engine, err error) {
 		// core.TokenIDTable:    createTableExecutor,
 		// core.TokenIDSelect:   selectExecutor,
 		// core.TokenIDInsert:   insertIntoTableExecutor,
-		// core.TokenIDDelete:   deleteExecutor,
+		core.TokenIDDelete: deleteExecutor,
 		// core.TokenIDUpdate:   updateExecutor,
 		core.TokenIDIf:       ifExecutor,
 		core.TokenIDNot:      notExecutor,
