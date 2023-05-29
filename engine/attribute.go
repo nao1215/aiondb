@@ -86,3 +86,55 @@ func parseAttribute(decl *core.Decl) (Attribute, error) {
 	}
 	return attr, nil
 }
+
+// attributeExistsInTable checks if an attribute exists in a table
+func attributeExistsInTable(e *Engine, attr string, table string) error {
+	r := e.relation(table)
+	if r == nil {
+		return fmt.Errorf("table \"%s\" does not exist", table)
+	}
+
+	found := false
+	for _, tAttr := range r.table.attributes {
+		if tAttr.name == attr {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("attribute %s does not exist in table %s", attr, table)
+	}
+	return nil
+}
+
+// attributesExistInTables checks if an attributes exists in a table
+func attributesExistInTables(e *Engine, attributes []Attribute, tables []string) error {
+	for _, attr := range attributes {
+		if attr.name == "COUNT" {
+			continue
+		}
+
+		if strings.Contains(attr.name, ".") {
+			t := strings.Split(attr.name, ".")
+			if err := attributeExistsInTable(e, t[1], t[0]); err != nil {
+				return err
+			}
+			continue
+		}
+
+		found := 0
+		for _, t := range tables {
+			if err := attributeExistsInTable(e, attr.name, t); err == nil {
+				found++
+			}
+			if found == 0 {
+				return fmt.Errorf("attribute %s does not exist in tables %v", attr.name, tables)
+			}
+			if found > 1 {
+				return fmt.Errorf("ambiguous attribute %s", attr.name)
+			}
+		}
+	}
+	return nil
+}
