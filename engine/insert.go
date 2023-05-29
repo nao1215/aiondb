@@ -48,15 +48,17 @@ func insertIntoTableExecutor(e *Engine, insertDecl *core.Decl, conn protocol.Eng
 
 	// if RETURNING decl is not present
 	if returnedID != "" {
-		conn.WriteRowHeader([]string{returnedID})
-		for _, id := range ids {
-			conn.WriteRow([]string{fmt.Sprintf("%v", id)})
+		if err := conn.WriteRowHeader([]string{returnedID}); err != nil {
+			return err
 		}
-		conn.WriteRowEnd()
-	} else {
-		conn.WriteResult(ids[len(ids)-1], (int64)(len(ids)))
+		for _, id := range ids {
+			if err := conn.WriteRow([]string{fmt.Sprintf("%v", id)}); err != nil {
+				return err
+			}
+		}
+		return conn.WriteRowEnd()
 	}
-	return nil
+	return conn.WriteResult(ids[len(ids)-1], (int64)(len(ids)))
 }
 
 // getRelation returns the relation and the attributes of the table
@@ -77,7 +79,7 @@ func getRelation(e *Engine, intoDecl *core.Decl) (*Relation, []*core.Decl, error
 
 // insert inserts a new tuple in the relation
 func insert(r *Relation, attributes []*core.Decl, values []*core.Decl, returnedID string) (int64, error) {
-	var assigned = false
+	var assigned bool
 	var id int64
 	var valuesindex int
 
@@ -87,7 +89,7 @@ func insert(r *Relation, attributes []*core.Decl, values []*core.Decl, returnedI
 	for attrindex, attr := range r.table.attributes {
 		assigned = false
 		for x, decl := range attributes {
-			if attr.name == decl.Lexeme.String() && attr.autoIncrement == false {
+			if attr.name == decl.Lexeme.String() && !attr.autoIncrement {
 				// Before adding value in tuple, check it's not a builtin func or arithmetic operation
 				switch values[x].TokenID {
 				case core.TokenIDNow:
@@ -132,7 +134,11 @@ func insert(r *Relation, attributes []*core.Decl, values []*core.Decl, returnedI
 		// Do we have a UNIQUE attribute ? if so
 		if attr.unique {
 			for i := range r.rows { // check all value already in relation (yup, no index tree)
-				if r.rows[i].Values[attrindex].(string) == string(values[valuesindex].Lexeme) {
+				val, ok := r.rows[i].Values[attrindex].(string)
+				if !ok {
+					return 0, fmt.Errorf("failed to type assertion")
+				}
+				if val == string(values[valuesindex].Lexeme) {
 					return 0, fmt.Errorf("unique constraint violation")
 				}
 			}
@@ -142,8 +148,7 @@ func insert(r *Relation, attributes []*core.Decl, values []*core.Decl, returnedI
 		if !assigned {
 			switch val := attr.defaultValue.(type) {
 			case func() interface{}:
-				v := (func() interface{})(val)()
-				t.Append(v)
+				t.Append(val)
 			default:
 				t.Append(attr.defaultValue)
 			}
