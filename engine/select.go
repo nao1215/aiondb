@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nao1215/aiondb/engine/parser/core"
+	"github.com/nao1215/aiondb/engine/protocol"
 )
 
 // fromExecutor returns a slice of tables from a FROM declaration
@@ -149,6 +150,39 @@ func isExecutor(isDecl *core.Decl, p *Predicate) error {
 		p.Operator = isNullOperator
 	} else {
 		p.Operator = isNotNullOperator
+	}
+	return nil
+}
+
+// selectExecutor returns a slice of attributes from a SELECT declaration.
+type selectFunctor interface {
+	// Init is called once before the first call to FeedVirtualRow.
+	Init(e *Engine, conn protocol.EngineConn, attr []string, alias []string) error
+	// FeedVirtualRow is called for each row of the result set.
+	FeedVirtualRow(row virtualRow) error
+	// Done is called after the last call to FeedVirtualRow.
+	Done() error
+}
+
+// selectRows perform actual check of predicates present in virtualrow.
+func selectRows(row virtualRow, predicates []PredicateLinker, functors []selectFunctor) error {
+	var res bool
+	var err error
+
+	// If the row validate all predicates, write it
+	for _, predicate := range predicates {
+		if res, err = predicate.Eval(row); err != nil {
+			return err
+		}
+		if !res {
+			return nil
+		}
+	}
+
+	for i := range functors {
+		if err := functors[i].FeedVirtualRow(row); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -2,6 +2,11 @@ package engine
 
 import "fmt"
 
+// PredicateLinker referes to AND and OR operators.
+type PredicateLinker interface {
+	Eval(v virtualRow) (bool, error)
+}
+
 // Value is a value given to predicates
 type Value struct {
 	v        interface{}
