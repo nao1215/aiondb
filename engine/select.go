@@ -9,7 +9,7 @@ import (
 
 // fromExecutor returns a slice of tables from a FROM declaration
 func fromExecutor(fromDecl *core.Decl) []*Table {
-	tables := make([]*Table, len(fromDecl.DeclList))
+	tables := make([]*Table, 0, len(fromDecl.DeclList))
 	for _, t := range fromDecl.DeclList {
 		tables = append(tables, NewTable(t.Lexeme.String()))
 	}
@@ -18,7 +18,7 @@ func fromExecutor(fromDecl *core.Decl) []*Table {
 
 // whereExecutor returns a slice of predicates from a WHERE declaration.
 func whereExecutor(whereDecl *core.Decl, fromTableName string) ([]Predicate, error) {
-	predicates := make([]Predicate, len(whereDecl.DeclList))
+	predicates := make([]Predicate, 0, len(whereDecl.DeclList))
 	var err error
 	whereDecl.String(0)
 
@@ -119,7 +119,7 @@ func inExecutor(inDecl *core.Decl, p *Predicate) error {
 	p.Operator = inOperator
 
 	// Put everything in a []string
-	values := make([]string, len(inDecl.DeclList))
+	values := make([]string, 0, len(inDecl.DeclList))
 	for i := range inDecl.DeclList {
 		values = append(values, inDecl.DeclList[i].Lexeme.String())
 	}
@@ -133,7 +133,7 @@ func notInExecutor(inDecl *core.Decl, p *Predicate) error {
 	p.Operator = notInOperator
 
 	// Put everything in a []string
-	values := make([]string, len(inDecl.DeclList))
+	values := make([]string, 0, len(inDecl.DeclList))
 	for i := range inDecl.DeclList {
 		values = append(values, inDecl.DeclList[i].Lexeme.String())
 	}

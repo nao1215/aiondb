@@ -80,7 +80,7 @@ func (i *inner) Evaluate(row virtualRow, r *Relation, index int) (bool, error) {
 			break
 		}
 	}
-	if t2.valid == false {
+	if !t2.valid {
 		return false, fmt.Errorf("joining on table %s, attribute %s not found", i.t2Value.table, i.t2Value.lexeme)
 	}
 
@@ -119,11 +119,11 @@ func generateVirtualRows(e *Engine, attr []Attribute, conn protocol.EngineConn, 
 	}
 
 	// Write header
-	var header []string
-	var alias []string
+	header := make([]string, 0, len(attr))
+	alias := make([]string, 0, len(attr))
 	for _, a := range attr {
 		alias = append(alias, a.name)
-		if strings.Contains(a.name, ".") == false {
+		if !strings.Contains(a.name, ".") {
 			a.name = t1Name + "." + a.name
 		}
 		header = append(header, a.name)
